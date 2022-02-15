@@ -1,5 +1,3 @@
-# Solidity-Open-Source
-Themis smart contract source. Verified on Etherscan
 # [Themis Protocol](https://themis.exchange/) &middot; [![License:SPDX-License-Identifier: MIT](https://img.shields.io/badge/License-SPDX-blue)](https://github.com/domcleal/spdx-licenses)
 
 Open source implementation of the Themis Decentralized Lending Pools protocol. 
