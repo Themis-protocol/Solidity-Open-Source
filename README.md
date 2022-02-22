@@ -30,7 +30,7 @@ We want Themis protocol to be the best it can be, so we’re calling on our comm
 
 More details about the bounty proceeds and how to apply can be found here:
 
-[https://docs.themis.exchange/](https://docs.themis.exchange/DEV-Docs/Bug-Bounty)
+[Immunefi Bug Bounty](https://immunefi.com/bounty/themisprotocol/)
 
 ## **Responsible disclosure**
 
