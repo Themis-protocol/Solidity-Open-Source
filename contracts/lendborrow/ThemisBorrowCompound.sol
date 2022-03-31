@@ -15,6 +15,7 @@ import "../governance/RoleControl.sol";
 import "./ThemisFinanceToken.sol";
 
 import "../uniswap/IUniswapV3Oracle.sol";
+import "../uniswap/IUniswapV3PoolWhite.sol";
 
 import "../interfaces/IThemisAuction.sol";
 import "../interfaces/IThemisBorrowCompoundStorage.sol";
@@ -48,6 +49,7 @@ contract ThemisBorrowCompound is IThemisBorrowCompoundStorage,IThemisLendCompoun
     event FunderClaimEvent(address indexed sender,uint256 pid,uint256 amount);
     event MinSettingCollateralEvent(address indexed sender,uint256 pid,uint256 beforeVal,uint256 afterVal);
     event PausePoolEvent(address indexed sender,uint256 pid,bool flag);
+    event ChangeUniswapV3OracleEvent(address indexed sender,address beforeVal,address afterVal);
  
     mapping(address => mapping(uint256 => BorrowUserInfo)) public borrowUserInfos;
     // Mapping from holder address to their (enumerable) set of owned borrow id
@@ -67,8 +69,8 @@ contract ThemisBorrowCompound is IThemisBorrowCompoundStorage,IThemisLendCompoun
     IThemisLendCompound public lendCompound;
     CompoundBorrowPool[] public borrowPoolInfo;
     
-    address[] public nftV3Token0WhiteList;
-    address[] public nftV3Token1WhiteList;
+    address[] public ______________________back;  // Invalid field, before nftV3Token0WhiteList
+    address[] public ______________________back1;  // Invalid field, before nftV3Token1WhiteList
     
     address[] public special721Arr;
     mapping(address => Special721Info) public special721Info;
@@ -129,6 +131,16 @@ contract ThemisBorrowCompound is IThemisBorrowCompoundStorage,IThemisLendCompoun
         settlementBorrowAuth[themisAuction] = true;
         interestPlatformRate = _interestPlatformRate;
     }
+
+    function checkNftV3WhiteList(uint256 tokenId) public view returns(bool flag) {
+        return IUniswapV3PoolWhite(0x502f11922661D072f91b73ae981eeedB236cb944).checkV3PoolWhiteList(tokenId);
+    }
+
+    function changeUniswapV3Oracle(address _uniswapV3Oracle) external onlyGovernance{
+        address _beforeVal = address(uniswapV3Oracle);
+        uniswapV3Oracle  = IUniswapV3Oracle(_uniswapV3Oracle);
+        emit ChangeUniswapV3OracleEvent(msg.sender,_beforeVal,_uniswapV3Oracle);
+    }
     
     function setMinSettingCollateral(uint256 _pid,uint256 _minAmount) external onlyGovernance{
         uint256 _beforeVal = minSettingCollateral[_pid];
@@ -176,27 +188,6 @@ contract ThemisBorrowCompound is IThemisBorrowCompoundStorage,IThemisLendCompoun
         
     }
     
-    function addNftV3WhiteList(address tokenA,address tokenB) external onlyGovernance{
-        require( nftV3Token0WhiteList.length ==  nftV3Token1WhiteList.length,"error for nftV3Token0WhiteList size.");
-        (address _token0, address _token1) = sortTokens(tokenA,tokenB);
-        uint256 _position = nftV3Token0WhiteList.length;
-
-        nftV3Token0WhiteList.push(_token0);
-        nftV3Token1WhiteList.push(_token1);
-        emit AddNftV3WhiteListEvent(_position,msg.sender,_token0,_token1);
-    }
-    
-    function setNftV3WhiteList(uint256 position,address tokenA,address tokenB) external onlyGovernance{
-        require( nftV3Token0WhiteList.length ==  nftV3Token1WhiteList.length,"error for nftV3Token0WhiteList size.");
-        require( nftV3Token0WhiteList[position]!=address(0),"error for nftV3Token0WhiteList position.");
-        (address _token0, address _token1) = sortTokens(tokenA,tokenB);
-        address _beforeToken0 = nftV3Token0WhiteList[position];
-        address _beforeToken1 = nftV3Token1WhiteList[position];
-        nftV3Token0WhiteList[position] = _token0;
-        nftV3Token1WhiteList[position] = _token1;
-        
-        emit SetNftV3WhiteListEvent(position,msg.sender,_beforeToken0,_beforeToken1,_token0,_token1);
-    }
     
     function setSpecial721BorrowRate(address special721,uint256 rate,string memory name) external onlyGovernance{
         require(rate < 1000,"The maximum ratio has been exceeded.");
@@ -502,19 +493,6 @@ contract ThemisBorrowCompound is IThemisBorrowCompoundStorage,IThemisLendCompoun
         emit SettlementBorrowEvent(bid, _borrowInfo.pid,_borrowInfo.amount,_borrowInfo.interests,_platFormInterests);
     }
     
-
-    function checkNftV3WhiteList(uint256 tokenId) public view returns(bool flag) {
-        (address _tokenA,address _tokenB,,,) = uniswapV3Oracle.getNFTAmounts(tokenId);
-        (address _token0, address _token1) = sortTokens(_tokenA,_tokenB);
-        flag = false;
-        for (uint256 i = 0; i < nftV3Token0WhiteList.length; i++) {
-            if(nftV3Token0WhiteList[i] == _token0 && nftV3Token1WhiteList[i] == _token1){
-                flag = true;
-                break;
-            }
-        }
-
-    }
     
     function getSpecial721Length() external view returns(uint256){
         return special721Arr.length;

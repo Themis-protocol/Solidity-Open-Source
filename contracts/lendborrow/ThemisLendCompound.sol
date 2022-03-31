@@ -390,9 +390,9 @@ contract ThemisLendCompound is IThemisLendCompoundStorage,RoleControl,Initializa
         LendUserInfo memory user = lendUserInfos[_user][_pid];
         
         uint256 _globalLendInterestShare = borrowCompound.getGlobalLendInterestShare(_pid);
-        _lendInterests = user.userDli.mul(_globalLendInterestShare.sub(user.lastLendInterestShare)).div(1e12).add(user.unRecvInterests);
+        _lendInterests = user.userDli.mul(_globalLendInterestShare.sub(user.lastLendInterestShare)).div(1e12);
         _platFormInterests = _lendInterests.mul(interestPlatformRate).div(10_000);
-        _lendInterests = _lendInterests.sub(_platFormInterests);
+        _lendInterests = _lendInterests.sub(_platFormInterests).add(user.unRecvInterests);
     }
     
 

@@ -24,7 +24,7 @@ interface IERC20{
     function decimals() external view returns (uint8);
 }
 
-contract UniswapV3ChainLinkOracle  is Initializable{
+contract UniswapV3ChainLinkUsdOracle  is Initializable{
 
     using SafeMath for uint256;
     
@@ -175,5 +175,5 @@ contract UniswapV3ChainLinkOracle  is Initializable{
         require(_priceFeed!=address(0),"Not configured.");
         (,_answer,,,) = AggregatorV3Interface(_priceFeed).latestRoundData();
     }
-
+    
 }

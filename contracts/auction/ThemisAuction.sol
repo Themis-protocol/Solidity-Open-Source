@@ -69,6 +69,7 @@ contract ThemisAuction is RoleControl,IThemisBorrowCompoundStorage,Initializable
     event SetFunderEvent(address indexed sender,address beforeVal,address afterVal);
     event FunderClaimEvent(address indexed sender,address token,uint256 amount);
     event SetStreamingProcessorEvent(address indexed sender,address beforeVal,address afterVal);
+    event ChangeUniswapV3OracleEvent(address indexed sender,address beforeVal,address afterVal);
     
     mapping(uint256 => AuctionInfo) public auctionInfos;
     uint256 public reductionTime = 14_400;
@@ -118,6 +119,11 @@ contract ThemisAuction is RoleControl,IThemisBorrowCompoundStorage,Initializable
         streamingProcessor = _streamingProcessor;
     }
 
+    function changeUniswapV3Oracle(address _uniswapV3Oracle) external onlyGovernance{
+        address _beforeVal = address(uniswapV3Oracle);
+        uniswapV3Oracle  = IUniswapV3Oracle(_uniswapV3Oracle);
+        emit ChangeUniswapV3OracleEvent(msg.sender,_beforeVal,_uniswapV3Oracle);
+    }
     
     function setActionConfig(uint256 _reductionRatio,uint256 _reductionTime,uint256 _riskFactor,uint256 _onePriceRatio) onlyGovernance external{
         require(_reductionRatio <1_000, "max reductionRatio.");
